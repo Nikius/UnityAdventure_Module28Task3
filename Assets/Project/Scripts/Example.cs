@@ -6,34 +6,37 @@ namespace Project.Scripts
 {
     public class Example : MonoBehaviour
     {
-        private EnemyContainerService _enemyContainerService;
+        private EnemyDestroyProcessService _enemyDestroyProcessService;
+        private EnemyCreator _enemyCreator;
 
         private void Awake()
         {
-            _enemyContainerService = new EnemyContainerService();
+            _enemyDestroyProcessService = new EnemyDestroyProcessService();
+            _enemyCreator = new EnemyCreator();
         }
 
         private void Update()
         {
-            _enemyContainerService.UpdateEnemiesList();
-            Debug.Log("Enemy count: " + _enemyContainerService.Count);
+            _enemyDestroyProcessService.UpdateEnemiesList();
+            Debug.Log("Enemy count: " + _enemyDestroyProcessService.Count);
 
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
                 Debug.Log("Added logic enemy (died immediately)");
-                _enemyContainerService.AddLogicEnemy(true);
+                _enemyDestroyProcessService.Add(_enemyCreator.Create(),() => true);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha2))
             {
                 Debug.Log("Added timer enemy (died after 5 sec)");
-                _enemyContainerService.AddTimerEnemy(5);
+                float deathTime = 5 + Time.time;
+                _enemyDestroyProcessService.Add(_enemyCreator.Create(),() => Time.time > deathTime);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha3))
             {
-                Debug.Log("Added agoraphobic enemy (died if has more then 3 neighbours)");
-                _enemyContainerService.AddAgoraphobicEnemy(3);
+                Debug.Log("Added agoraphobic enemy (died if there is more then 4 enemies)");
+                _enemyDestroyProcessService.Add(_enemyCreator.Create(),() => _enemyDestroyProcessService.Count > 4);
             }
         }
     }
